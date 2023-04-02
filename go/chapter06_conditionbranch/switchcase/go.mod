@@ -1,3 +1,3 @@
-module example/magic
+module switchcase
 
 go 1.20

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	manager "switchcase/cmd/ver1/magicManager"
+	manager "switchcase/cmd/ver2/magicManager"
 	magic "switchcase/magicutil"
 )
 

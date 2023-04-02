@@ -1,7 +1,7 @@
-package main
+package magicManager
 
 import (
-	"example/magic"
+	magic "switchcase/magicutil"
 )
 
 type MagicManager struct{}

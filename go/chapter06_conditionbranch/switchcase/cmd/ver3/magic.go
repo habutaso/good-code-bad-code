@@ -1,7 +1,7 @@
 package ver3
 
 import (
-	magicUtil "example/magic"
+	magicUtil "switchcase/magicutil"
 )
 
 type Magic struct {

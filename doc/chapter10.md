@@ -55,6 +55,7 @@ class: top
 2. 目的ベースで名づけする
 3. 名づけのリスク
 4. 意味が伝わりにくい名前
+TODO: 見直し
 ---
 
 <!--
@@ -345,7 +346,35 @@ class: top
 ---
 
 # 形容詞の区別が必要な名前
-TODO
+> 新入: すみません、`Member.MaxHitPoint`が最大ヒットポイントなんですよね？
+> 先輩: そうだよ
+> 新入: `Member.MaxHitPoint`に体防具の最大ヒットポイント増加値を加算するとうまく動かなくなるんです、、、
+> 先輩: ああ。。。`Member.MaxHitPoint`はね、アイテムによる相乗効果が反映されてない『もともとの』最大ヒットポイントなんだよね。『補正された』最大ヒットポイントは別のところで計算しているんだ。
+> 新入: 僕の実装では、『もともとの』最大ヒットポイントに体防具の最大ヒットポイント増加値をさらに加算していたんですよね。だから、『補正された』最大ヒットポイントがおかしくなっていたんですね。
+
+<!--
+新入社員が、ゲーム制作で体防具のエンチャント効果をつける追加実装を行うと想定してください。
+現在は`Member.MaxHitPoint`が実装されています。新入社員はここに実装すれば良いと考えました。
+-->
+
+---
+
+# 意味の違いがわかる命名をする
+形容詞を使って説明をされていた。しかし、先輩がいたからわかっただけで、仕様をよく知る人がいなければこの構造に気づけない。
+次のような命名をして気付けるようにすると良い。
++ 『もともとの』最大ヒットポイント：`Member.OriginalMaxHitPoint`
++ 『補正された』最大ヒットポイント：`Member.CorrectedMaxHitPoint`
+
+---
+
+# 形容詞をつけて区別したいものはクラス化する
+`CorrectedMaxHitPoint`クラスを作成して、`OriginalMaxHitPoint`クラスを委譲する実装にすると良い。
+TODO: 図
+
+
+<!--
+それ以外にも、例えば「このフラグが立っている時のUserは要注意人物」「この行のpriceは新品価格で、次の行のpriceは中古価格」こういった形容詞補正がかかる言葉は全てクラス化してしまう
+-->
 
 ---
 
@@ -460,10 +489,72 @@ class: read invert
 -->
 
 # 構造を大きく歪ませてしまう名前
-TODO: この辺全部
 
 ---
 
+<!--
+class: top
+-->
+<style scoped>
+  pre { font-size: 22px; }
+</style>
+
+# データクラス
+```go
+type ProductInfo struct {
+  ProductId id
+  ProductName string
+}
+```
+`Info`や`Data`と名前をつけた場合は、データだけを持たせるクラスなのだと勘違いされやすい。->低凝集に陥りやすい
+`Product`に改名すべきかつ、`Product`に関係するロジックをここに集めるべき
+
+---
+<style scoped>
+  pre { font-size: 20px; }
+</style>
+
+
+# データクラスを使って良い例
+**DTO**として使用する。**CQRS**と呼ばれる、更新責務と参照責務を分離する設計パターンで使用することはOK
+ただし、参照系としての**DTO**を表すクラスなのであれば、値が変わることはないことを明示するために**Immutable**にすること
+Goはレシーバーを値渡しにすることで、**Immutable**を表現することができる(この辺はRustの方が強い)
+```go
+type ProductInfo struct {
+  ProductId id
+  ProductName string
+}
+
+func (p ProductInfo) ProductId() id {
+  return p.productId
+}
+
+func (p ProductInfo) ProductName() string {
+  return p.productName
+}
+```
+
+---
+<style scoped>
+  pre { font-size: 20px; }
+</style>
+
+# クラスが巨大化する名前
+```go
+// ❌
+type MemberManager struct {
+  HP hp // これはMemberManagerの責務？
+  MP mp // これはMemberManagerの責務？
+}
+
+func (mm MemberManager) startWalkAnimation() {} // これはMemberManagerの責務？
+
+func (mm MemberManager) exportParamsToCSV() {} // これはMemberManagerの責務？
+```
+
+もうそろそろお気づきかと思いますが、`MemberManager`なんて作らず、`HP`や`MP`をクラスとしてそこにロジックを持たせるべき
+
+---
 <!--
 class: top
 -->
